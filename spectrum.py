@@ -1,15 +1,11 @@
 import sounddevice as sd
 import scipy.signal as sig
+from scipy.io.wavfile import read
 import numpy as np
 import matplotlib.pyplot as plt
 
-fs = 8000  # Sample rate
-seconds = 3  # Duration of recording
 
-myrecording = sd.rec(int(seconds * fs), samplerate=fs, channels=1)
-sd.wait()  # Wait until recording is finished
-a = np.asarray(myrecording)
-a = a[:,0]
+fs, a = read('sample1.wav')
 print(a.shape)
 N = len(a)
 

@@ -2,4 +2,4 @@ numpy
 scipy
 mido
 matplotlib
-python-sounddevice
+sounddevice
