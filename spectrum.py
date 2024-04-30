@@ -18,7 +18,7 @@ Sx = SFT.stft(a)
 
 fig1, ax1 = plt.subplots(figsize=(6.,4.))
 t_lo,  t_hi = SFT.extent(N)[:2]
-ax1.set_title("Waterfall")
+ax1.set_title("Spectral intensity plot")
 ax1.set(xlabel=f"Time $t$ in seconds ({SFT.p_num(N)} slices, " +
                rf"$\Delta t = {SFT.delta_t:g}\,$s)",
         ylabel=f"Freq. $f$ in Hz ({SFT.f_pts} bins, " +
