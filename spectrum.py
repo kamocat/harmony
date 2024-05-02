@@ -2,10 +2,10 @@ import scipy.signal as sig
 from scipy.io.wavfile import read
 import numpy as np
 import matplotlib.pyplot as plt
-from os import path
+from os import path, listdir
 
-def spectrum(fname):
-    fs, a = read(fname)
+def spectrum(infile, outfile=None):
+    fs, a = read(infile)
     print(a.shape)
     N = len(a)
     rHz = 10 #Frequency resolution in Hz
@@ -56,7 +56,17 @@ def spectrum(fname):
     ax3.set_ylabel("Amplitude (dB)", color=color)
     ax3.plot(t,amplitude, color=color)
     fig1.tight_layout()
-    fig1.savefig(fname.partition('.')[0]+'.png')
+    if outfile is None:
+        plt.show()
+    else:
+        fig1.savefig(outfile)
 
 
-spectrum('sample1.wav')
+d = 'wav'
+e = 'img'
+a = listdir('wav')
+for x in a:
+    infile = path.join(d,x)
+    outfile = path.join(e,x.partition('.')[0]+'.png')
+    print(x)
+    spectrum(infile,outfile)
