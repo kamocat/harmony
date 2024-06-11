@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from math import floor, ceil
 
 fs, a = read('wav/sample1.wav')
-print(a.shape)
+print(f'File dimensions: {a.shape}')
 N = len(a)
 rHz = 1 #Frequency resolution in Hz
 rs = 0.01 #Temporal resolution in seconds
@@ -17,7 +17,7 @@ SFT = sig.ShortTimeFFT(sig.windows.hamming(fs//rHz, sym=False),
 # Perform FFT
 Sx = SFT.stft(a)
 
-print(Sx.shape)
+print('FFT dimensions: {Sx.shape}')
 
 mag = np.abs(Sx)
 
@@ -25,30 +25,30 @@ min_note = 21 #Lowest piano note A0
 max_note = 94 #A6 + 1
 max_pitch = mag.shape[1]
 tonotes= np.zeros((max_pitch, max_note-min_note))
-lo = 2**(1/24)
-hi = 2**(-1/24)
+lo = 2**(-1/24)
+hi = 2**(1/24)
 
 for i in range(min_note, max_note ):
     # Convert MIDI note to center pitch
     pitch = 440 / rHz * (2**((i-69)/12)) 
-    print(f'key {i-min_note} pitch {pitch}Hz')
+    #print(f'key {i-min_note} pitch {pitch:.0f} Hz')
     n = 0
     for amp in [1,.5,.3,.25]:
         n += pitch 
         # Generate high and low range for each overtone
-        lo2 = floor(lo * n)
+        lo2 = int(floor(lo * n))
         if lo2 >= max_pitch-1:
             #print(f'Note {i} pitch {pitch*rHz} too high at amp {amp}')
             break #We ran out of spectrum
-        hi2 = min(ceil(hi * n),max_pitch-1)
+        hi2 = int(min(ceil(hi * n + 1),max_pitch))
         # Update the transform matrix
         tonotes[lo2:hi2,i-min_note]=amp
-print(np.sum(tonotes,axis=0))
+print(f'Transform weights: {np.sum(tonotes,axis=0)}')
 
 
     
 notes = np.matmul(mag, tonotes)
-print(notes.shape)
+print(f'Notes matrix shape: {notes.shape}')
 
 plt.imshow(tonotes.T, cmap='gray', vmin='0', vmax='1')
 plt.show()
