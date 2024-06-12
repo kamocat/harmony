@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import floor, ceil
 
-fs, a = read('wav/sample1.wav')
+fs, a = read('wav/sample8.wav')
 print(f'File dimensions: {a.shape}')
 N = len(a)
 rHz = 1 #Frequency resolution in Hz
@@ -17,13 +17,13 @@ SFT = sig.ShortTimeFFT(sig.windows.hamming(fs//rHz, sym=False),
 # Perform FFT
 Sx = SFT.stft(a)
 
-print('FFT dimensions: {Sx.shape}')
+print(f'FFT dimensions: {Sx.shape}')
 
 mag = np.abs(Sx)
 
-min_note = 21 #Lowest piano note A0
-max_note = 94 #A6 + 1
-max_pitch = mag.shape[1]
+min_note = 0
+max_note = 127
+max_pitch = mag.shape[0]
 tonotes= np.zeros((max_pitch, max_note-min_note))
 lo = 2**(-1/24)
 hi = 2**(1/24)
@@ -33,7 +33,7 @@ for i in range(min_note, max_note ):
     pitch = 440 / rHz * (2**((i-69)/12)) 
     #print(f'key {i-min_note} pitch {pitch:.0f} Hz')
     n = 0
-    for amp in [1,.5,.3,.25]:
+    for amp in [1,.3,.1,.03]:
         n += pitch 
         # Generate high and low range for each overtone
         lo2 = int(floor(lo * n))
@@ -47,31 +47,24 @@ print(f'Transform weights: {np.sum(tonotes,axis=0)}')
 
 
     
-notes = np.matmul(mag, tonotes)
+notes = np.matmul(mag.T, tonotes)
 print(f'Notes matrix shape: {notes.shape}')
 
-plt.imshow(tonotes.T, cmap='gray', vmin='0', vmax='1')
-plt.show()
+#plt.imshow(notes.T, cmap='gray', vmin='0', vmax=notes.max())
+#plt.show()
 
-if 0:
+if 1:
     fig1, ax1 = plt.subplots()
     t_lo,  t_hi = SFT.extent(N)[:2]
     ax1.set_title("Note intensity plot")
     ax1.set(xlabel=f"Time $t$ in seconds ({SFT.p_num(N)} slices, " +
                    rf"$\Delta t = {SFT.delta_t:g}\,$s)",
-            ylabel=f"Keys of a piano",
+            ylabel=f"Midi note",
             xlim=(t_lo, t_hi))
 
-    im1 = ax1.imshow(notes, origin='lower', aspect='auto',
+    im1 = ax1.imshow(notes.T, origin='lower', aspect='auto',
                      extent=SFT.extent(N), cmap='viridis')
     fig1.colorbar(im1, label="Magnitude $|S_x(t, f)|$")
-
-    # Shade areas where window slices stick out to the side:
-    for t0_, t1_ in [(t_lo, SFT.lower_border_end[0] * SFT.T),
-                     (SFT.upper_border_begin(N)[0] * SFT.T, t_hi)]:
-        ax1.axvspan(t0_, t1_, color='w', linewidth=0, alpha=.2)
-    for t_ in [0, N * SFT.T]:  # mark signal borders with vertical line:
-        ax1.axvline(t_, color='y', linestyle='--', alpha=0.5)
 
     fig1.tight_layout()
     plt.show()
