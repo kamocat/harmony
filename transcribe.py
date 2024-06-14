@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import floor, ceil
 
-def from_file(fname):
+def from_file(fname, debug=False):
     fs, a = read(fname)
     print(f'{fname} dimensions: {a.shape}')
     N = len(a)
@@ -44,33 +44,33 @@ def from_file(fname):
     keys = np.argmax(np.matmul(mag.T, tonotes), axis=1)
 
     # Get note start times
-    attack = sig.savgol_filter(envelope, 10, 2, deriv=1, mode='nearest')
-    thresh = np.max(attack) * 0.1
-    times = sig.find_peaks(attack, height=thresh)[0]
+#    attack = sig.savgol_filter(envelope, 10, 2, deriv=1, mode='nearest')
+    thresh = np.max(envelope) * 0.1
+    times = sig.find_peaks(envelope, height=thresh)[0]
     melody = keys[times]
     
-    '''
-    # Plot the data
-    fig, [[ax1,ax2],[ax3,ax4]]= plt.subplots(2,2)
-    ax4.plot(attack, color='tab:green')
-    ax3.step(times, melody)
-    color = 'tab:blue'
-    ax2.set_ylabel('Amplitude')
-    ax2.plot(envelope, color=color)
-    ax2.tick_params(axis='y', labelcolor=color)
-    color = 'tab:red'
-    ax1.set_xlabel(f'Time ({rs} seconds)')
-    ax1.set_ylabel('MIDI key')
-    ax1.plot(keys, color=color)
-    ax1.tick_params(axis='y', labelcolor=color)
-    fig.tight_layout()
-    plt.show()
-    '''
-    times = np.append(times, len(attack))
+    if debug:
+        # Plot the data
+        fig, [[ax1,ax2],[ax3,ax4]]= plt.subplots(2,2)
+        #ax4.plot(attack, color='tab:green')
+        ax3.step(times, melody)
+        color = 'tab:blue'
+        ax2.set_ylabel('Amplitude')
+        ax2.plot(envelope, color=color)
+        ax2.tick_params(axis='y', labelcolor=color)
+        color = 'tab:red'
+        ax1.set_xlabel(f'Time ({rs} seconds)')
+        ax1.set_ylabel('MIDI key')
+        ax1.plot(keys, color=color)
+        ax1.tick_params(axis='y', labelcolor=color)
+        fig.tight_layout()
+        plt.show()
+
+    times = np.append(times, len(envelope))
     durations = rs * (times[1:] - times[:-1])
 
     return melody, durations
 
 if __name__ == '__main__':
-    from_file('wav/sample8.wav')
+    from_file('wav/sample3.wav', debug=True)
 
