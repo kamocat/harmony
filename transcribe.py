@@ -48,6 +48,12 @@ def from_file(fname, debug=False):
     thresh = np.max(envelope) * 0.1
     times = sig.find_peaks(envelope, height=thresh)[0]
     melody = keys[times]
+    #Joining consecutive notes as a workaround for seeing too many attacks
+    #A better solution would be to fix the peak finding settings
+    melody = np.insert(melody, 0, -1)
+    transitions = melody[:-1] != melody[1:]
+    times = times[transitions]
+    melody = keys[times]
     
     if debug:
         # Plot the data
@@ -72,5 +78,6 @@ def from_file(fname, debug=False):
     return melody, durations
 
 if __name__ == '__main__':
-    from_file('wav/sample3.wav', debug=True)
+    m,d = from_file('wav/sample3.wav', debug=True)
+    print(list(zip(m,d)))
 
