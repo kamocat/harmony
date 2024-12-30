@@ -1,6 +1,4 @@
 numpy
-scipy
+librosa
 mido
 matplotlib
-sounddevice
-soundfile
