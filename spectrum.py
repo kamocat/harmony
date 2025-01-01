@@ -1,4 +1,5 @@
 import librosa
+import soundfile as sf
 import numpy as np
 import matplotlib.pyplot as plt
 from os import path, listdir
@@ -29,6 +30,7 @@ def spectrum(infile, outfile=None):
     
     ax4.set_title("Estimated pitch (pyin)")
     b = librosa.istft(D_harmonic, n_fft=fs//rHz, hop_length=int(fs*rs) )
+    c = librosa.istft(D_percussive, n_fft=fs//rHz, hop_length=int(fs*rs) )
     f0, _, voiced_prob = librosa.pyin(b, 
         fmin=librosa.note_to_hz('C2'), 
         fmax=librosa.note_to_hz('C7'),
@@ -39,11 +41,16 @@ def spectrum(infile, outfile=None):
     pitches, magnitudes = librosa.piptrack(S=D_harmonic, fmin=100, fmax=4000, )
     ax4.plot(pitches)
     '''
-	
+
     if outfile is None:
         plt.show()
     else:
         fig.savefig(outfile)
+        _, outfile = path.split(infile)
+        outfile,_,_ = outfile.partition('.')
+        outfile = path.join('wav_out',outfile+'.wav')
+        newsound = np.stack([b,c]).T
+        sf.write(outfile, newsound, fs, subtype='FLOAT')
 
 d = 'wav'
 e = 'img'

@@ -2,3 +2,4 @@ venv/
 *.mid
 __pycache__/
 img/
+wav_out/
