@@ -20,9 +20,12 @@ def spectrum(infile, outfile=None):
     img = librosa.display.specshow(S_db, ax=ax1)
     fig.colorbar(img, ax=ax1)
 
-    ax2.set_title("Estimated pitch")
-    pitches, magnitudes = librosa.piptrack(S=D)
-    ax2.plot(pitches)
+    ax2.set_title("Estimated pitch (pyin)")
+    f0, _, voiced_prob = librosa.pyin(a, 
+        fmin=librosa.note_to_hz('C2'), 
+        fmax=librosa.note_to_hz('C7'),
+        sr = fs, resolution=0.1, max_transition_rate=2,)
+    ax2.plot(f0)
 	
     if outfile is None:
         plt.show()
