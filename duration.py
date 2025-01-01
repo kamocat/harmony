@@ -36,13 +36,9 @@ salience = librosa.salience(np.abs(D_harmonic), freqs=freqs,
 salience = np.nan_to_num(salience)
 ax2.plot(librosa.amplitude_to_db(np.max(salience, axis=0)), label="volume")
 
+print(salience.shape)
 ax3.set_title("Pitch")
-pitch = [freqs[x] for x in np.argmax(salience, axis=0)]
-peaks2 = np.append(peaks[1:], -1)
-median_pitch = [np.median(pitch[x:y]) for x,y in zip(peaks, peaks2)]
-# Extend so it graphs correctly
-median_pitch.append(median_pitch[-1])
-ax3.step(np.append(peaks, len(A_percussive)),median_pitch, where="post")
+ax3.plot([freqs[x] for x in np.argmax(salience, axis=0)])
 
 if outfile is None:
     plt.show()
