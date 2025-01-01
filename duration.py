@@ -19,26 +19,35 @@ freqs = librosa.fft_frequencies(sr=fs, n_fft=fs//rHz)
 D_harmonic, D_percussive = librosa.decompose.hpss(D, margin=8)
 rp = np.max(np.abs(D))
 
-fig, (ax1,ax2,ax3) = plt.subplots(3)
-ax1.set_title("Harmonic spectrogram")
-img = librosa.display.specshow(librosa.amplitude_to_db(np.abs(D_harmonic), ref=rp), ax=ax1, y_axis='log')
-fig.colorbar(img, ax=ax1)
+fig, (ax3,ax2) = plt.subplots(2)
 
-ax2.set_title("Amplitude")
 A_percussive = librosa.amplitude_to_db(np.sum(np.abs(D_percussive),axis=0))
-ax2.plot(A_percussive, label = "percussive")
 
 peaks,properties = find_peaks(A_percussive, height=45 )
 print(f'Attacks found at {peaks}')
-
 salience = librosa.salience(np.abs(D_harmonic), freqs=freqs, 
-                            harmonics=[1,2,3,4,5,6,7,8])
+                            harmonics=list(range(1,8)))
 salience = np.nan_to_num(salience)
-ax2.plot(librosa.amplitude_to_db(np.max(salience, axis=0)), label="volume")
 
-print(salience.shape)
 ax3.set_title("Pitch")
-ax3.plot([freqs[x] for x in np.argmax(salience, axis=0)])
+pitch = [freqs[x] for x in np.argmax(salience, axis=0)]
+peaks2 = np.append(peaks[1:], -1)
+median_pitch = [np.median(pitch[x:y]) for x,y in zip(peaks, peaks2)]
+
+padded_pitch = np.empty(D.shape[-1])
+for i in range(len(median_pitch)):
+    padded_pitch[peaks[i]:peaks2[i]] = median_pitch[i]
+padded_pitch[:peaks[0]] = median_pitch[0]
+timbre = librosa.f0_harmonics(D, freqs=freqs, f0=padded_pitch, harmonics=list(range(1,17)))
+    
+# Extend so it graphs correctly
+median_pitch.append(median_pitch[-1])
+ax3.step(np.append(peaks, len(A_percussive)),median_pitch, where="post")
+ax3.set_xlim(0, len(A_percussive))
+
+ax2.set_title("Timbre")
+img = librosa.display.specshow(librosa.amplitude_to_db(np.abs(timbre)), ax=ax2)
+#fig.colorbar(img, ax=ax2)
 
 if outfile is None:
     plt.show()
